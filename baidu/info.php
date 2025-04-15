@@ -5,7 +5,7 @@ header("Access-Control-Allow-Origin: *");
 $apiKey = 'WudU5gYqNiT2Zfn2BODo1xHLz9Sk9BJf';
 $secretKey = 'YUhNo3RpPobcfIQtcG3GbbFYULSZHaZY';
 $siteId = '21845401';
-$code = 'e8f84702ccb4d0155173624be81a4904';
+$code = '4fb79f5336f8c7ebc6028f805b726604';
 
 function getAccessToken($apiKey, $secretKey, $code) {
   $url = "https://openapi.baidu.com/oauth/2.0/token";
