@@ -20,7 +20,7 @@ function getAccessToken($apiKey, $secretKey, $code) {
   $query = http_build_query($params);
   $response = @file_get_contents($url . '?' . $query); // 使用@符号忽略警告
   if ($response === false) {
-      logError('Error fetching access token.');
+      // logError('Error fetching access token.');
       die('Error fetching access token.'); // 返回错误信息给前端
   }
   $data = json_decode($response, true);
@@ -39,13 +39,13 @@ function refreshAccessToken($apiKey, $secretKey, $refreshToken) {
   $query = http_build_query($params);
   $response = @file_get_contents($url . '?' . $query); // 使用@符号忽略警告
   if ($response === false) {
-      logError('Error refreshing access token.');
+      // logError('Error refreshing access token.');
       throw new Exception('Error refreshing access token.');
   }
   $data = json_decode($response, true);
 
   if (isset($data['error'])) {
-      logError('API Error: ' . $data['error_description']);
+      // logError('API Error: ' . $data['error_description']);
       throw new Exception('Error refreshing access token: ' . $data['error_description']);
   }
 
@@ -68,7 +68,7 @@ function getData($startDate, $endDate, $metrics, $accessToken, $siteId) {
 
   $response = @file_get_contents($fullUrl); // 使用@符号忽略警告
   if ($response === false) {
-      logError('Error fetching data.');
+      // logError('Error fetching data.');
       throw new Exception('Error fetching data.');
   }
   return json_decode($response, true);
@@ -81,19 +81,26 @@ function saveTokens($accessToken, $refreshToken) {
   )));
 }
 
-function loadTokens() {
-  if (!file_exists('tokens.json')) {
-      return null;
-  }
-  return json_decode(file_get_contents('tokens.json'), true);
-}
+// function loadTokens() {
+//   if (!file_exists('tokens.json')) {
+//       return null;
+//   }
+//   return json_decode(file_get_contents('tokens.json'), true);
+// }
 
-function logError($message) {
-  file_put_contents('error_log.txt', date('Y-m-d H:i:s') . " - " . $message . PHP_EOL, FILE_APPEND);
-}
+// function logError($message) {
+//   file_put_contents('error_log.txt', date('Y-m-d H:i:s') . " - " . $message . PHP_EOL, FILE_APPEND);
+// }
 
 function checkAndRefreshTokens($apiKey, $secretKey) {
-  $tokens = loadTokens();
+  $tokens = {
+  "expires_in": 2592000,
+  "refresh_token": "122.2f7ba493b86baf618aecf4a4760507a2.YgAVBxvl0nJ-q14Ohphp7oPeW5cUlDPCrM-8tAx.GobR7w",
+  "access_token": "121.67a029707087dfa9208a7028cf776581.YlDUSjt38oNcr9CLeZWBJ3cEoETSrmKQXhfq4bx.v9mI8Q",
+  "session_secret": "",
+  "session_key": "",
+  "scope": "basic"
+};
   if ($tokens === null || expired($tokens['access_token'])) {
       global $code;
       $tokens = getAccessToken($apiKey, $secretKey, $code);
@@ -111,7 +118,7 @@ function checkAndRefreshTokens($apiKey, $secretKey) {
               break;
           } catch (Exception $e) {
               $attempts++;
-              logError('Attempt ' . $attempts . ' to refresh access token failed: ' . $e->getMessage());
+              // logError('Attempt ' . $attempts . ' to refresh access token failed: ' . $e->getMessage());
               if ($attempts == $maxAttempts) {
                   // 如果刷新 access token 失败，返回获取授权码地址的文本信息给前端
                   die('获取授权码地址：http://openapi.baidu.com/oauth/2.0/authorize?response_type=code&client_id=' . $apiKey . '&redirect_uri=oob&scope=basic&display=popup');
@@ -136,9 +143,9 @@ $cacheFile = 'data_cache.json';
 $cacheTime = 10800;
 
 // 检查缓存文件是否存在且未过期
-if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
-$data = json_decode(file_get_contents($cacheFile), true);
-} else {
+// if (file_exists($cacheFile) && (time() - filemtime($cacheFile) < $cacheTime)) {
+// $data = json_decode(file_get_contents($cacheFile), true);
+// } else {
 // 准备数据
 $data = array(
     'today_uv' => null,
@@ -188,14 +195,14 @@ if (isset($yearData['result']['items'][1])) {
     }
     
     $data['last_year_pv'] = array_sum(array_column($dataPoints, 0));
-}
+// }
 
 // 添加最近31天的PV总和
 $data['last_month_pv'] = $last31DaysPV;
 
 // 保存数据到缓存文件
-file_put_contents($cacheFile, json_encode($data));
-}
+// file_put_contents($cacheFile, json_encode($data));
+// }
 
 // 返回JSON数据
 header('Content-Type: application/json');
